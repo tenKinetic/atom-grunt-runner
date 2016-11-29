@@ -41,8 +41,7 @@ module.exports = class GruntRunnerView extends View
         @disposables = new CompositeDisposable
         @disposables.add(
             atom.project.onDidChangePaths => @parseGruntFile()
-            #atom.workspace.onDidChangeActivePaneItem => @parseGruntFile()
-            atom.workspace.onDidStopChangingActivePaneItem => @parseGruntFile()
+            atom.workspace.onDidChangeActivePaneItem => @parseGruntFile()
 
             atom.tooltips.add @startstopbtn,
                 title: "Start",
@@ -143,8 +142,7 @@ module.exports = class GruntRunnerView extends View
             @testPaths = []
             for path in gruntPaths
               @testPaths = @testPaths.concat(atom.config.get('grunt-runner.gruntfilePaths').map (e) -> "#{path}#{e}")
-            #console.log @testPaths
-            Task.once require.resolve('./parse-config-task'), @testPaths[0], ({error, tasks, path}) => @handleTask(@, error, tasks, path, 0, starting)
+            Task.once require.resolve('./parse-config-task'), @testPaths[0], ({error, tasks, path}) => @handleTask(@, error, tasks, @testPaths[0], 0, starting)
 
     handleEvents: ->
         @on 'mousedown', '.grunt-runner-resizer-handle', (e) => @resizeStarted(e)
@@ -154,7 +152,7 @@ module.exports = class GruntRunnerView extends View
           # does not display the log directly, waits until all attempts have failed
           @failuresLog.push("Error loading gruntfile: #{error} (#{path})")
 
-          if @testPaths[(index + 1)] && (~error.indexOf("Gruntfile not found.") or ~error.indexOf("Error parsing Gruntfile."))
+          if @testPaths[(index + 1)] #&& (~error.indexOf("Gruntfile not found.") or ~error.indexOf("Error parsing Gruntfile."))
             Task.once require.resolve('./parse-config-task'), @testPaths[(index + 1)], ({error, tasks, path}) => @handleTask(view, error, tasks, path, (index + 1), starting)
 
           # all gruntfile possibilities have failed, show all logs
